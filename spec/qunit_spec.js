@@ -1187,7 +1187,7 @@ test("bug reported by @fat where lambdas weren't being properly resolved", funct
 
 suite("Redpie Tests");
 
-test("Test Helper paramsData", function() {
+test("Test Helper paramsData is passed", function() {
   var template = CompilerContext.compile('{{#test boolean}}YES{{else}}NO{{/test}}');
 
   var helpers = {
@@ -1205,6 +1205,35 @@ test("Test Helper paramsData", function() {
       } else {
         return options.inverse(this);
       }
+    }
+  };
+
+  var context = {
+    'boolean': true
+  }
+
+  var result = template(context, {helpers: helpers});
+
+  equals(result, "YES", "Proper context variable output");
+});
+
+test("Test Helper paramsData is passed correctly with leading stringParam", function() {
+  var template = CompilerContext.compile('{{#test "stringParam" boolean}}YES{{else}}NO{{/test}}');
+
+  var helpers = {
+    test: function(stringParam, nonStringParam, options, paramsData) {
+      equals(paramsData.length, 2, 'Correct number of objects in paramsData');
+
+      paramTwo = paramsData[1];
+
+      ok(paramTwo.context !== undefined, 'paramsData[1].context is undefined');
+      ok(paramTwo.path !== undefined, 'paramsData[1].path is undefined');
+      
+      if (nonStringParam) {
+        return options.fn(this);
+      } else {
+        return options.inverse(this);
+      }
     },
   };
 
@@ -1215,4 +1244,129 @@ test("Test Helper paramsData", function() {
   var result = template(context, {helpers: helpers});
 
   equals(result, "YES", "Proper context variable output");
+});
+
+test("Test Helper paramsData context is correct", function() {
+  var template = CompilerContext.compile('{{test level1/level2/level3/property}}');
+
+  var context = {
+    level1: {level2: {level3: {property: "value"}}}
+  }
+
+  var helpers = {
+    test: function(value, options, paramsData) {
+      paramOne = paramsData[0];
+
+      equals(paramOne.context, Object(paramOne.context), 'Param context is not an object');
+      equals(paramOne.context, context, 'Param context has an invalid value');
+    },
+  };
+
+  template(context, {helpers: helpers});
+});
+
+test("Test Helper paramsData context is correct inside a with", function() {
+  var template = CompilerContext.compile('{{#with level1}}{{test level2/level3/property}}{{/with}}');
+
+  var context = {
+    level1: {level2: {level3: {property: "value"}}}
+  }
+
+  var helpers = {
+    test: function(value, options, paramsData) {
+      paramOne = paramsData[0];
+
+      equals(paramOne.context, Object(paramOne.context), 'Param context is not an object');
+      equals(paramOne.context, context.level1, 'Param context has an invalid value');
+    },
+    with: Handlebars.helpers['with']
+  };
+
+  template(context, {helpers: helpers});
+});
+
+test("Test Helper paramsData context is correct inside a relative with", function() {
+  var template = CompilerContext.compile('{{#with level1}}{{test ../property}}{{/with}}');
+
+  var context = {
+    level1: {level2: {level3: {}}, property: "value"}
+  }
+
+  var helpers = {
+    test: function(value, options, paramsData) {
+      paramOne = paramsData[0];
+
+      equals(paramOne.context, Object(paramOne.context), 'Param context is not an object');
+      equals(paramOne.context, context, 'Param context has an invalid value');
+    },
+    with: Handlebars.helpers['with']
+  };
+
+  template(context, {helpers: helpers});
+});
+
+test("Test Helper paramsData path is correct", function() {
+  var template = CompilerContext.compile('{{test level1/level2/level3/property}}');
+
+  var helpers = {
+    test: function(value, options, paramsData) {
+      paramOne = paramsData[0];
+
+      equals(paramOne.path.length, 4, 'Incorrect number of path parts');
+
+      ok(paramOne.path !== undefined, 'paramsData[0].path is undefined');
+      equals(paramOne.path.join(','), 'level1,level2,level3,property', 'Path parts are incorrect');
+    },
+  };
+
+  var context = {
+    level1: {level2: {level3: {property: "value"}}}
+  }
+
+  template(context, {helpers: helpers});
+});
+
+test("Test Helper paramsData path is correct inside a with", function() {
+  var template = CompilerContext.compile('{{#with level1}}{{test level2/level3/property}}{{/with}}');
+
+  var context = {
+    level1: {level2: {level3: {property: "value"}}}
+  }
+
+  var helpers = {
+    test: function(value, options, paramsData) {
+      paramOne = paramsData[0];
+
+      equals(paramOne.path.length, 3, 'Incorrect number of path parts');
+
+      ok(paramOne.path !== undefined, 'paramsData[0].path is undefined');
+      equals(paramOne.path.join(','), 'level2,level3,property', 'Path parts are incorrect');
+    },
+    with: Handlebars.helpers['with']
+  };
+
+  template(context, {helpers: helpers});
+});
+
+
+test("Test Helper paramsData path is correct inside a relative with", function() {
+  var template = CompilerContext.compile('{{#with level1}}{{test ../property}}{{/with}}');
+
+  var context = {
+    level1: {level2: {level3: {}}, property: "value"}
+  }
+
+  var helpers = {
+    test: function(value, options, paramsData) {
+      paramOne = paramsData[0];
+
+      equals(paramOne.path.length, 1, 'Incorrect number of path parts');
+
+      ok(paramOne.path !== undefined, 'paramsData[0].path is undefined');
+      equals(paramOne.path.join(','), 'property', 'Path parts are incorrect');
+    },
+    with: Handlebars.helpers['with']
+  };
+
+  template(context, {helpers: helpers});
 });
