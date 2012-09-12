@@ -1370,3 +1370,33 @@ test("Test Helper paramsData path is correct inside a relative with", function()
 
   template(context, {helpers: helpers});
 });
+
+
+test("Test nameLookup will use a get() method if present", function() {
+  var template = CompilerContext.compile('{{test level1/level2/level3/property}}');
+
+  var context = {
+    level1: {
+      level2: {
+        _level3: {
+          _property: "success",
+          property: "failure",
+          get: function(prop) {
+            return this['_'+prop];
+          }
+        },
+        get: function(prop) {
+          return this['_'+prop];
+        }
+      }
+    }
+  }
+
+  var helpers = {
+    test: function(value, options, paramsData) {
+      equals(value, 'success', 'nameLookup did not use the available get() method');
+    },
+  };
+
+  template(context, {helpers: helpers});
+});
