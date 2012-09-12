@@ -1184,3 +1184,35 @@ test("bug reported by @fat where lambdas weren't being properly resolved", funct
   var output = "<strong>This is a slightly more complicated blah.</strong>.\n\nCheck this out:\n\n<ul>\n\n<li class=one>@fat</li>\n\n<li class=two>@dhg</li>\n\n<li class=three>@sayrer</li>\n</ul>.\n\n";
   shouldCompileTo(string, data, output);
 });
+
+suite("Redpie Tests");
+
+test("Test Helper paramsData", function() {
+  var template = CompilerContext.compile('{{#test boolean}}YES{{else}}NO{{/test}}');
+
+  var helpers = {
+    test: function(value, options, paramsData) {
+
+      equals(paramsData.length, 1, 'Correct number of objects in paramsData');
+
+      paramOne = paramsData[0];
+
+      ok(paramOne.context !== undefined, 'paramsData[0].context is undefined');
+      ok(paramOne.path !== undefined, 'paramsData[0].path is undefined');
+      
+      if (value) {
+        return options.fn(this);
+      } else {
+        return options.inverse(this);
+      }
+    },
+  };
+
+  var context = {
+    'boolean': true
+  }
+
+  var result = template(context, {helpers: helpers});
+
+  equals(result, "YES", "Proper context variable output");
+});
