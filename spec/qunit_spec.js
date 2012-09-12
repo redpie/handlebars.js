@@ -1400,3 +1400,18 @@ test("Test nameLookup will use a get() method if present", function() {
 
   template(context, {helpers: helpers});
 });
+
+test("Test nameLookup handle the string 'undefined' correctly", function() {
+  var template = CompilerContext.compile('{{test undefined}}');
+
+  var context = {}
+
+  var helpers = {
+    test: function(value, options, paramsData) {
+      equals(value, undefined, 'nameLookup did not handle undefined correctly');
+    }
+  };
+
+  template(context, {helpers: helpers});
+});
+
