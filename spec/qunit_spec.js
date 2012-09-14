@@ -1200,7 +1200,7 @@ test("Test Helper paramsData is passed", function() {
       paramOne = paramsData[0];
 
       ok(paramOne.context !== undefined, 'paramsData[0].context is undefined');
-      ok(paramOne.path !== undefined, 'paramsData[0].path is undefined');
+      ok(paramOne.property !== undefined, 'paramsData[0].property is undefined');
       
       if (value) {
         return options.fn(this);
@@ -1229,7 +1229,7 @@ test("Test Helper paramsData is passed correctly with leading stringParam", func
       paramTwo = paramsData[1];
 
       ok(paramTwo.context !== undefined, 'paramsData[1].context is undefined');
-      ok(paramTwo.path !== undefined, 'paramsData[1].path is undefined');
+      ok(paramTwo.property !== undefined, 'paramsData[1].property is undefined');
       
       if (nonStringParam) {
         return options.fn(this);
@@ -1260,7 +1260,7 @@ test("Test Helper paramsData context is correct", function() {
       paramOne = paramsData[0];
 
       equals(paramOne.context, Object(paramOne.context), 'Param context is not an object');
-      equals(paramOne.context, context, 'Param context has an invalid value');
+      equals(paramOne.context, context.level1.level2.level3, 'Param context has an invalid value');
     },
   };
 
@@ -1279,7 +1279,7 @@ test("Test Helper paramsData context is correct inside a with", function() {
       paramOne = paramsData[0];
 
       equals(paramOne.context, Object(paramOne.context), 'Param context is not an object');
-      equals(paramOne.context, context.level1, 'Param context has an invalid value');
+      equals(paramOne.context, context.level1.level2.level3, 'Param context has an invalid value');
     },
     with: Handlebars.helpers['with']
   };
@@ -1307,17 +1307,15 @@ test("Test Helper paramsData context is correct inside a relative with", functio
   template(context, {helpers: helpers});
 });
 
-test("Test Helper paramsData path is correct", function() {
+test("Test Helper paramsData property is correct", function() {
   var template = CompilerContext.compile('{{test level1/level2/level3/property}}');
 
   var helpers = {
     test: function(value, options, paramsData) {
       paramOne = paramsData[0];
 
-      equals(paramOne.path.length, 4, 'Incorrect number of path parts');
-
-      ok(paramOne.path !== undefined, 'paramsData[0].path is undefined');
-      equals(paramOne.path.join(','), 'level1,level2,level3,property', 'Path parts are incorrect');
+      ok(paramOne.property !== undefined, 'paramsData[0].property is undefined');
+      equals(paramOne.property, 'property', 'Incorrect property name');
     },
   };
 
@@ -1339,10 +1337,8 @@ test("Test Helper paramsData path is correct inside a with", function() {
     test: function(value, options, paramsData) {
       paramOne = paramsData[0];
 
-      equals(paramOne.path.length, 3, 'Incorrect number of path parts');
-
-      ok(paramOne.path !== undefined, 'paramsData[0].path is undefined');
-      equals(paramOne.path.join(','), 'level2,level3,property', 'Path parts are incorrect');
+      ok(paramOne.property !== undefined, 'paramsData[0].property is undefined');
+      equals(paramOne.property, 'property', 'Incorrect property name');
     },
     with: Handlebars.helpers['with']
   };
@@ -1362,10 +1358,8 @@ test("Test Helper paramsData path is correct inside a relative with", function()
     test: function(value, options, paramsData) {
       paramOne = paramsData[0];
 
-      equals(paramOne.path.length, 1, 'Incorrect number of path parts');
-
-      ok(paramOne.path !== undefined, 'paramsData[0].path is undefined');
-      equals(paramOne.path.join(','), 'property', 'Path parts are incorrect');
+      ok(paramOne.property !== undefined, 'paramsData[0].property is undefined');
+      equals(paramOne.property, 'property', 'Incorrect property name');
     },
     with: Handlebars.helpers['with']
   };
@@ -1422,10 +1416,7 @@ test("Test nameLookup will handle arrays correcting using the at() method", func
     test: function(value, options, paramsData) {
       equals(value, 'valid', 'nameLookup did not use data');
       equals(paramsData[0].context, context.nested.property, 'invalid context');
-      equals(paramsData[0].path.length, 3, 'invalid number of path parts');
-      equals(paramsData[0].path[0], 'nested', 'invalid path');
-      equals(paramsData[0].path[1], 'property', 'invalid path');
-      equals(paramsData[0].path[2], 2, 'invalid path');
+      equals(paramsData[0].property, '2', 'invalid property name');
     },
   };
 
@@ -1462,8 +1453,7 @@ test("Test nameLookup data rather than context if ID starts with a ~", function(
       equals(value, 'valid', 'nameLookup did not use data');
       equals(paramsData[0].isData, true, 'isData flag missing');
       equals(paramsData[0].context, dataContext, 'invalid context');
-      equals(paramsData[0].path.length, 1, 'invalid number of path parts');
-      equals(paramsData[0].path[0], 'property', 'invalid path');
+      equals(paramsData[0].property, 'property', 'invalid property name');
     },
   };
 
@@ -1488,9 +1478,7 @@ test("Test nameLookup data rather than context if ID starts with a ~ nested", fu
       equals(value, 'valid', 'nameLookup did not use data');
       equals(paramsData[0].isData, true, 'isData flag missing');
       equals(paramsData[0].context, dataContext.nested, 'invalid context');
-      equals(paramsData[0].path.length, 2, 'invalid number of path parts');
-      equals(paramsData[0].path[0], 'nested', 'invalid path');
-      equals(paramsData[0].path[1], 'property', 'invalid path');
+      equals(paramsData[0].property, 'property', 'invalid property name');
     },
   };
 
@@ -1520,10 +1508,7 @@ test("Test nameLookup data rather than context if ID starts with a ~ nested with
       equals(value, 'valid', 'nameLookup did not use data');
       equals(paramsData[0].isData, true, 'isData flag missing');
       equals(paramsData[0].context, dataContext.nested.property, 'invalid context');
-      equals(paramsData[0].path.length, 3, 'invalid number of path parts');
-      equals(paramsData[0].path[0], 'nested', 'invalid path');
-      equals(paramsData[0].path[1], 'property', 'invalid path');
-      equals(paramsData[0].path[2], 2, 'invalid path');
+      equals(paramsData[0].property, '2', 'invalid property name');
     },
   };
 
