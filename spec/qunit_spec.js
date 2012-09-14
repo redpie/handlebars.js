@@ -1402,6 +1402,34 @@ test("Test nameLookup will use a get() method if present", function() {
   template(context, {helpers: helpers});
 });
 
+test("Test nameLookup will handle arrays correcting using the at() method", function() {
+  var template = CompilerContext.compile('{{test nested.property.[2]}}');
+
+  var context = {
+    nested: {
+      property: [
+        'invalidOne',
+        'invalidTwo',
+        'valid',
+        'invalidThree',
+      ]
+    }
+  }
+
+  var helpers = {
+    test: function(value, options, paramsData) {
+      equals(value, 'valid', 'nameLookup did not use data');
+      equals(paramsData[0].context, context.nested.property, 'invalid context');
+      equals(paramsData[0].path.length, 3, 'invalid number of path parts');
+      equals(paramsData[0].path[0], 'nested', 'invalid path');
+      equals(paramsData[0].path[1], 'property', 'invalid path');
+      equals(paramsData[0].path[2], 2, 'invalid path');
+    },
+  };
+
+  template(context, {helpers: helpers});
+});
+
 test("Test nameLookup handle the string 'undefined' correctly", function() {
   var template = CompilerContext.compile('{{test undefined}}');
 
@@ -1433,7 +1461,7 @@ test("Test nameLookup data rather than context if ID starts with a ~", function(
       equals(paramsData[0].isData, true, 'isData flag missing');
       equals(paramsData[0].context, dataContext, 'invalid context');
       equals(paramsData[0].path.length, 1, 'invalid number of path parts');
-      equals(paramsData[0].path[0], '~property', 'invalid path');
+      equals(paramsData[0].path[0], 'property', 'invalid path');
     },
   };
 
@@ -1459,8 +1487,41 @@ test("Test nameLookup data rather than context if ID starts with a ~ nested", fu
       equals(paramsData[0].isData, true, 'isData flag missing');
       equals(paramsData[0].context, dataContext.nested, 'invalid context');
       equals(paramsData[0].path.length, 2, 'invalid number of path parts');
-      equals(paramsData[0].path[0], '~nested', 'invalid path');
+      equals(paramsData[0].path[0], 'nested', 'invalid path');
       equals(paramsData[0].path[1], 'property', 'invalid path');
+    },
+  };
+
+  template(context, {helpers: helpers, data: dataContext});
+});
+
+test("Test nameLookup data rather than context if ID starts with a ~ nested with array", function() {
+  var template = CompilerContext.compile('{{test ~nested.property.[2]}}', {data: true});
+
+  var context = {
+    property: 'invalid'
+  }
+
+  var dataContext = {
+    nested: {
+      property: [
+        'invalidOne',
+        'invalidTwo',
+        'valid',
+        'invalidThree',
+      ]
+    }
+  }
+
+  var helpers = {
+    test: function(value, options, paramsData) {
+      equals(value, 'valid', 'nameLookup did not use data');
+      equals(paramsData[0].isData, true, 'isData flag missing');
+      equals(paramsData[0].context, dataContext.nested.property, 'invalid context');
+      equals(paramsData[0].path.length, 3, 'invalid number of path parts');
+      equals(paramsData[0].path[0], 'nested', 'invalid path');
+      equals(paramsData[0].path[1], 'property', 'invalid path');
+      equals(paramsData[0].path[2], 2, 'invalid path');
     },
   };
 
