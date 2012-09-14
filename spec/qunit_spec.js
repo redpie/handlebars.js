@@ -1185,7 +1185,7 @@ test("bug reported by @fat where lambdas weren't being properly resolved", funct
   shouldCompileTo(string, data, output);
 });
 
-suite("Redpie Tests");
+suite("Redpie Tests - paramsData");
 
 test("Test Helper paramsData is passed", function() {
   var template = CompilerContext.compile('{{#test boolean}}YES{{else}}NO{{/test}}');
@@ -1371,6 +1371,7 @@ test("Test Helper paramsData path is correct inside a relative with", function()
   template(context, {helpers: helpers});
 });
 
+suite("Redpie Tests - nameLookup");
 
 test("Test nameLookup will use a get() method if present", function() {
   var template = CompilerContext.compile('{{test level1/level2/level3/property}}');
@@ -1415,3 +1416,53 @@ test("Test nameLookup handle the string 'undefined' correctly", function() {
   template(context, {helpers: helpers});
 });
 
+test("Test nameLookup data rather than context if ID starts with a ~", function() {
+  var template = CompilerContext.compile('{{test ~property}}', {data: true});
+
+  var context = {
+    property: 'invalid'
+  }
+
+  var dataContext = {
+    property: 'valid'
+  }
+
+  var helpers = {
+    test: function(value, options, paramsData) {
+      equals(value, 'valid', 'nameLookup did not use data');
+      equals(paramsData[0].isData, true, 'isData flag missing');
+      equals(paramsData[0].context, dataContext, 'invalid context');
+      equals(paramsData[0].path.length, 1, 'invalid number of path parts');
+      equals(paramsData[0].path[0], '~property', 'invalid path');
+    },
+  };
+
+  template(context, {helpers: helpers, data: dataContext});
+});
+
+test("Test nameLookup data rather than context if ID starts with a ~ nested", function() {
+  var template = CompilerContext.compile('{{test ~nested.property}}', {data: true});
+
+  var context = {
+    property: 'invalid'
+  }
+
+  var dataContext = {
+    nested: {
+      property: 'valid'
+    }
+  }
+
+  var helpers = {
+    test: function(value, options, paramsData) {
+      equals(value, 'valid', 'nameLookup did not use data');
+      equals(paramsData[0].isData, true, 'isData flag missing');
+      equals(paramsData[0].context, dataContext.nested, 'invalid context');
+      equals(paramsData[0].path.length, 2, 'invalid number of path parts');
+      equals(paramsData[0].path[0], '~nested', 'invalid path');
+      equals(paramsData[0].path[1], 'property', 'invalid path');
+    },
+  };
+
+  template(context, {helpers: helpers, data: dataContext});
+});
