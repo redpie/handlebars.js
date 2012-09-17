@@ -1369,15 +1369,15 @@ test("Test Helper paramsData path is correct inside a relative with", function()
 
 suite("Redpie Tests - nameLookup");
 
-test("Test nameLookup will use a get() method if present", function() {
+test("Test nameLookup will use a propery over a get() method if present", function() {
   var template = CompilerContext.compile('{{test level1/level2/level3/property}}');
 
   var context = {
     level1: {
       level2: {
         _level3: {
-          _property: "success",
-          property: "failure",
+          _property: "failure",
+          property: "success",
           get: function(prop) {
             return this['_'+prop];
           }
