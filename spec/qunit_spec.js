@@ -1514,3 +1514,119 @@ test("Test nameLookup data rather than context if ID starts with a ~ nested with
 
   template(context, {helpers: helpers, data: dataContext});
 });
+
+suite("Redpie Tests - additional function params");
+
+test("Test depth0 and view data is passed through on function calls", function() {
+  var template = CompilerContext.compile('{{myFunction}}', {data: true});
+
+  var context = {
+    contextMarker: 'yes',
+    myFunction: function(depth0, data) {
+       equals(this.contextMarker, 'yes', 'invalid value for this');
+       equals(depth0.contextMarker, 'yes', 'invalid value for depth0');
+       equals(data.dataContextMarker, 'yes', 'invalid value for data');
+    }
+  }
+
+  var dataContext = {
+    dataContextMarker: 'yes'
+  };
+
+  template(context, {data: dataContext});
+});
+
+test("Test depth0 and view data is passed through on function calls inside an each", function() {
+  var template = CompilerContext.compile('{{#each items}}{{myFunction}}{{/each}}', {data: true});
+
+  var iterationCounter = 0;
+
+  var myFunction = function(depth0, data) {
+    iterationCounter++;
+    equals(this.contextMarker, iterationCounter, 'invalid value for this');
+    equals(depth0.contextMarker, iterationCounter, 'invalid value for depth0');
+    equals(data.dataContextMarker, 'yes', 'invalid value for data');
+  };
+
+  var context = {
+    contextMarker: 'yes',
+    items: [{
+      contextMarker: 1,
+      myFunction: myFunction
+    },{
+      contextMarker: 2,
+      myFunction: myFunction
+    }]
+  }
+
+  var dataContext = {
+    dataContextMarker: 'yes'
+  };
+
+  template(context, {data: dataContext});
+});
+
+test("Test depth0 and view data is passed through on relative (parent) function calls inside an each", function() {
+  var template = CompilerContext.compile('{{#each items}}{{../myFunction}}{{/each}}', {data: true});
+
+  var iterationCounter = 0;
+
+  var myFunction = function(depth0, data) {
+    iterationCounter++;
+    equals(this.contextMarker, 'yes', 'invalid value for this');
+    equals(depth0.contextMarker, iterationCounter, 'invalid value for depth0');
+    equals(data.dataContextMarker, 'yes', 'invalid value for data');
+  };
+
+  var context = {
+    contextMarker: 'yes',
+    myFunction: myFunction,
+    items: [{
+      contextMarker: 1
+    },{
+      contextMarker: 2
+    }]
+  }
+
+  var dataContext = {
+    dataContextMarker: 'yes'
+  };
+
+  template(context, {data: dataContext});
+});
+
+test("Test depth0 and view data is passed through on relative (nested) function calls inside an each", function() {
+  var template = CompilerContext.compile('{{#each items}}{{nested/myFunction}}{{/each}}', {data: true});
+
+  var iterationCounter = 0;
+
+  var myFunction = function(depth0, data) {
+    iterationCounter++;
+    equals(this.nestedContextMarker, 'yes', 'invalid value for this');
+    equals(depth0.contextMarker, iterationCounter, 'invalid value for depth0');
+    equals(data.dataContextMarker, 'yes', 'invalid value for data');
+  };
+
+  var context = {
+    contextMarker: 'yes',
+    items: [{
+      contextMarker: 1,
+      nested: {
+        nestedContextMarker: 'yes',
+        myFunction: myFunction,
+      }
+    },{
+      contextMarker: 2,
+      nested: {
+        nestedContextMarker: 'yes',
+        myFunction: myFunction,
+      }
+    }]
+  }
+
+  var dataContext = {
+    dataContextMarker: 'yes'
+  };
+
+  template(context, {data: dataContext});
+});
