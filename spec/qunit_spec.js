@@ -1630,3 +1630,19 @@ test("Test depth0 and view data is passed through on relative (nested) function 
 
   template(context, {data: dataContext});
 });
+
+suite("Redpie Tests - Misc Tests");
+
+test("XXXXX", function() {
+  var template = CompilerContext.compile('{{~property}}', {data: true});
+
+  var context = {};
+
+  var dataContext = {
+    property: 'success'
+  };
+
+  var result = template(context, {data: dataContext});
+
+  equals('success', result, "Invalid Result");
+});
