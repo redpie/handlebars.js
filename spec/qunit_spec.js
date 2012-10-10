@@ -1367,6 +1367,48 @@ test("Test Helper paramsData path is correct inside a relative with", function()
   template(context, {helpers: helpers});
 });
 
+test("Test Helper paramsData has isThis = true when 'this' is used as an ID", function() {
+  var template = CompilerContext.compile('{{test this}}');
+
+  var helpers = {
+    test: function(value, options, paramsData) {
+
+      equals(paramsData.length, 1, 'Correct number of objects in paramsData');
+
+      paramOne = paramsData[0];
+
+      ok(paramOne.isThis !== undefined, 'paramsData[0].isThis is undefined');
+      ok(paramOne.isThis == true, 'paramsData[0].isThis is not true');
+    }
+  };
+
+  var context = {}
+
+  var result = template(context, {helpers: helpers});
+});
+
+test("Test Helper paramsData has isThis = false when 'this' is NOT used as an ID", function() {
+  var template = CompilerContext.compile('{{test name}}');
+
+  var helpers = {
+    test: function(value, options, paramsData) {
+
+      equals(paramsData.length, 1, 'Correct number of objects in paramsData');
+
+      paramOne = paramsData[0];
+
+      ok(paramOne.isThis !== undefined, 'paramsData[0].isThis is undefined');
+      ok(paramOne.isThis == false, 'paramsData[0].isThis is not false');
+    }
+  };
+
+  var context = {
+    'name': 'Kiall'
+  }
+
+  var result = template(context, {helpers: helpers});
+});
+
 suite("Redpie Tests - nameLookup");
 
 test("Test nameLookup will use a propery over a get() method if present", function() {
