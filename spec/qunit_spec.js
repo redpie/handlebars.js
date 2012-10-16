@@ -1664,7 +1664,7 @@ test("Test depth0 and view data is passed through on relative (nested) function 
         myFunction: myFunction,
       }
     }]
-  }
+  };
 
   var dataContext = {
     dataContextMarker: 'yes'
@@ -1673,18 +1673,285 @@ test("Test depth0 and view data is passed through on relative (nested) function 
   template(context, {data: dataContext});
 });
 
-suite("Redpie Tests - Misc Tests");
+suite("Redpie Tests - Indirect ID Lookups");
 
-test("XXXXX", function() {
-  var template = CompilerContext.compile('{{~property}}', {data: true});
+test("Key from Context, Value from Context", function() {
+  var template = CompilerContext.compile('{{test <a>}}');
+
+  var context = {
+    "a": "realKey",
+    "realKey": "success"
+  };
+
+  var helpers = {
+    test: function(value, options, paramsData) {
+      // throw new Error(JSON.stringify(paramsData));
+      equals(value, 'success', 'Indirect ID lookup failed');
+    },
+  };
+
+  template(context, {helpers: helpers});
+});
+
+test("Key from Context, Value from Nested Context", function() {
+  var template = CompilerContext.compile('{{test nested.<a>}}');
+
+  var context = {
+    "a": "realKey",
+    "nested": {
+      "realKey": "success"
+    }
+  };
+
+  var helpers = {
+    test: function(value, options, paramsData) {
+      // throw new Error(JSON.stringify(paramsData));
+      equals(value, 'success', 'Indirect ID lookup failed');
+    },
+  };
+
+  template(context, {helpers: helpers});
+});
+
+test("Key from Nested Context, Value from Nested Context", function() {
+  var template = CompilerContext.compile('{{test nested.<nested.a>}}');
+
+  var context = {
+    "nested": {
+      "a": "realKey",
+      "realKey": "success"
+    }
+  };
+
+  var helpers = {
+    test: function(value, options, paramsData) {
+      // throw new Error(JSON.stringify(paramsData));
+      equals(value, 'success', 'Indirect ID lookup failed');
+    },
+  };
+
+  template(context, {helpers: helpers});
+});
+
+test("Key from Data, Value from Context", function() {
+  var template = CompilerContext.compile('{{test <~a>}}', {data: true});
+
+  var context = {
+    "realKey": "success"
+  };
+
+  var dataContext = {
+    "a": "realKey"
+  };
+
+  var helpers = {
+    test: function(value, options, paramsData) {
+      // throw new Error(JSON.stringify(paramsData));
+      equals(value, 'success', 'Indirect ID lookup failed');
+    },
+  };
+
+  template(context, {helpers: helpers, data: dataContext});
+});
+
+test("Key from Data, Value from Data", function() {
+  var template = CompilerContext.compile('{{test ~.<~a>}}', {data: true});
 
   var context = {};
 
   var dataContext = {
-    property: 'success'
+    "a": "realKey",
+    "realKey": "success"
   };
 
-  var result = template(context, {data: dataContext});
+  var helpers = {
+    test: function(value, options, paramsData) {
+      // throw new Error(JSON.stringify(paramsData));
+      equals(value, 'success', 'Indirect ID lookup failed');
+    },
+  };
 
-  equals('success', result, "Invalid Result");
+  template(context, {helpers: helpers, data: dataContext});
+});
+
+test("Key from Context, Value from Data", function() {
+  var template = CompilerContext.compile('{{test ~.<a>}}', {data: true});
+
+  var context = {
+    "a": "realKey"
+  };
+
+  var dataContext = {
+    "realKey": "success"
+  };
+
+  var helpers = {
+    test: function(value, options, paramsData) {
+      // throw new Error(JSON.stringify(paramsData));
+      equals(value, 'success', 'Indirect ID lookup failed');
+    },
+  };
+
+  template(context, {helpers: helpers, data: dataContext});
+});
+
+test("Key from Nested Context, Value from Data", function() {
+  var template = CompilerContext.compile('{{test ~.<nested.a>}}', {data: true});
+
+  var context = {
+    "nested": {
+      "a": "realKey"
+    }
+  };
+
+  var dataContext = {
+    "realKey": "success"
+  };
+
+  var helpers = {
+    test: function(value, options, paramsData) {
+      // throw new Error(JSON.stringify(paramsData));
+      equals(value, 'success', 'Indirect ID lookup failed');
+    },
+  };
+
+  template(context, {helpers: helpers, data: dataContext});
+});
+
+test("Key from Data, Value from Nested Context", function() {
+  var template = CompilerContext.compile('{{test nested.<~a>}}', {data: true});
+
+  var context = {
+    "nested": {
+      "realKey": "success"
+    }
+  };
+
+  var dataContext = {
+    "a": "realKey"
+  };
+
+  var helpers = {
+    test: function(value, options, paramsData) {
+      // throw new Error(JSON.stringify(paramsData));
+      equals(value, 'success', 'Indirect ID lookup failed');
+    },
+  };
+
+  template(context, {helpers: helpers, data: dataContext});
+});
+
+test("Key from Nested Data, Value from Nested Context", function() {
+  var template = CompilerContext.compile('{{test nested.<~nested.a>}}', {data: true});
+
+  var context = {
+    "nested": {
+      "realKey": "success"
+    }
+  };
+
+  var dataContext = {
+    "nested": {
+      "a": "realKey"
+    }
+  };
+
+  var helpers = {
+    test: function(value, options, paramsData) {
+      // throw new Error(JSON.stringify(paramsData));
+      equals(value, 'success', 'Indirect ID lookup failed');
+    },
+  };
+
+  template(context, {helpers: helpers, data: dataContext});
+});
+
+
+test("Key from Nested Context, Value from Context", function() {
+  var template = CompilerContext.compile('{{test <a.b>}}');
+
+  var context = {
+    "a": {
+      "b": "realKey"
+    },
+    "realKey": "success"
+  };
+
+  var helpers = {
+    test: function(value, options, paramsData) {
+      // throw new Error(JSON.stringify(paramsData));
+      equals(value, 'success', 'Indirect ID lookup failed');
+    },
+  };
+
+  template(context, {helpers: helpers});
+});
+
+test("Key from Nested Context, Value from Nested Context", function() {
+  var template = CompilerContext.compile('{{test nested.<a.b>}}');
+
+  var context = {
+    "a": {
+      "b": "realKey"
+    },
+    "nested": {
+      "realKey": "success"
+    }
+  };
+
+  var helpers = {
+    test: function(value, options, paramsData) {
+      // throw new Error(JSON.stringify(paramsData));
+      equals(value, 'success', 'Indirect ID lookup failed');
+    },
+  };
+
+  template(context, {helpers: helpers});
+});
+
+test("Key from Nested Data, Value from Context", function() {
+  var template = CompilerContext.compile('{{test <~a.b>}}', {data: true});
+
+  var context = {
+    "realKey": "success"
+  };
+
+  var dataContext = {
+    "a": {
+      "b": "realKey"
+    }
+  };
+
+  var helpers = {
+    test: function(value, options, paramsData) {
+      // throw new Error(JSON.stringify(paramsData));
+      equals(value, 'success', 'Indirect ID lookup failed');
+    },
+  };
+
+  template(context, {helpers: helpers, data: dataContext});
+});
+
+test("Key from Nested Data, Value from Data", function() {
+  var template = CompilerContext.compile('{{test ~.<~a.b>}}', {data: true});
+
+  var context = {
+
+  };
+
+  var dataContext = {
+    "a": {
+      "b": "realKey"
+    },
+    "realKey": "success"
+  };
+
+  var helpers = {
+    test: function(value, options, paramsData) {
+      // throw new Error(JSON.stringify(paramsData));
+      equals(value, 'success', 'Indirect ID lookup failed');
+    },
+  };
+
+  template(context, {helpers: helpers, data: dataContext});
 });
