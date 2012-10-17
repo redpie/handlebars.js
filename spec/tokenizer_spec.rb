@@ -378,5 +378,43 @@ describe "Tokenizer" do
       result[3].should be_token("ID", "{bar}")
       result[4].should be_token("CLOSE", "}}")
     end
+
+    it "should parse indirect ID lookups which use {} as identifiers - {{ {schema.name} test}}" do
+      result = tokenize("{{ {schema.name} test}}")
+      result.should match_tokens(%w(OPEN ID SEP ID ID CLOSE))
+      
+      result[1].should be_token("ID", "{schema")
+      result[3].should be_token("ID", "name}")
+      result[4].should be_token("ID", "test")
+      result[5].should be_token("CLOSE", "}}")
+    end
+
+    it "should parse indirect ID lookups which use {} as identifiers - {{ {schema} test}}" do
+      result = tokenize("{{ {schema} test}}")
+      result.should match_tokens(%w(OPEN ID ID CLOSE))
+
+      result[1].should be_token("ID", "{schema}")
+      result[2].should be_token("ID", "test")
+      result[3].should be_token("CLOSE", "}}")
+    end
+
+    it "should parse indirect ID lookups which use {} as identifiers - {{ {schema} ~test}}" do
+      result = tokenize("{{ {schema} ~test}}")
+      result.should match_tokens(%w(OPEN ID ID CLOSE))
+
+      result[1].should be_token("ID", "{schema}")
+      result[2].should be_token("ID", "~test")
+      result[3].should be_token("CLOSE", "}}")
+    end
+
+    it "should parse indirect ID lookups which use {} as identifiers - {{test ~{~a.b} }}" do
+      result = tokenize("{{test ~{~a.b} }}")
+      result.should match_tokens(%w(OPEN ID ID SEP ID CLOSE))
+
+      result[1].should be_token("ID", "test")
+      result[2].should be_token("ID", "~{~a")
+      result[4].should be_token("ID", "b}")
+      result[5].should be_token("CLOSE", "}}")
+    end
   end
 end
