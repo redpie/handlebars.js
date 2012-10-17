@@ -362,5 +362,21 @@ describe "Tokenizer" do
       result[3].should be_token("ID", "{bar}")
       result[4].should be_token("CLOSE", "}}")
     end
+
+    it "should parse indirect ID lookups which use {} as identifiers - {{ ../{bar} }}" do
+      result = tokenize("{{ ../{bar} }}")
+      result.should match_tokens(%w(OPEN ID SEP ID CLOSE))
+      result[1].should be_token("ID", "..")
+      result[3].should be_token("ID", "{bar}")
+      result[4].should be_token("CLOSE", "}}")
+    end
+
+    it "should parse indirect ID lookups which use {} as identifiers - {{ ...{bar} }}" do
+      result = tokenize("{{ ...{bar} }}")
+      result.should match_tokens(%w(OPEN ID SEP ID CLOSE))
+      result[1].should be_token("ID", "..")
+      result[3].should be_token("ID", "{bar}")
+      result[4].should be_token("CLOSE", "}}")
+    end
   end
 end
