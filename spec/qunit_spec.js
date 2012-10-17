@@ -1676,7 +1676,7 @@ test("Test depth0 and view data is passed through on relative (nested) function 
 suite("Redpie Tests - Indirect ID Lookups");
 
 test("Key from Context, Value from Context", function() {
-  var template = CompilerContext.compile('{{test <a>}}');
+  var template = CompilerContext.compile('{{test {a} }}');
 
   var context = {
     "a": "realKey",
@@ -1694,7 +1694,7 @@ test("Key from Context, Value from Context", function() {
 });
 
 test("Key from Context, Value from Nested Context", function() {
-  var template = CompilerContext.compile('{{test nested.<a>}}');
+  var template = CompilerContext.compile('{{test nested.{a} }}');
 
   var context = {
     "a": "realKey",
@@ -1714,7 +1714,7 @@ test("Key from Context, Value from Nested Context", function() {
 });
 
 test("Key from Nested Context, Value from Nested Context", function() {
-  var template = CompilerContext.compile('{{test nested.<nested.a>}}');
+  var template = CompilerContext.compile('{{test nested.{nested.a} }}');
 
   var context = {
     "nested": {
@@ -1734,7 +1734,7 @@ test("Key from Nested Context, Value from Nested Context", function() {
 });
 
 test("Key from Data, Value from Context", function() {
-  var template = CompilerContext.compile('{{test <~a>}}', {data: true});
+  var template = CompilerContext.compile('{{test {~a} }}', {data: true});
 
   var context = {
     "realKey": "success"
@@ -1755,7 +1755,7 @@ test("Key from Data, Value from Context", function() {
 });
 
 test("Key from Data, Value from Data", function() {
-  var template = CompilerContext.compile('{{test ~<~a>}}', {data: true});
+  var template = CompilerContext.compile('{{test ~{~a} }}', {data: true});
 
   var context = {};
 
@@ -1775,7 +1775,7 @@ test("Key from Data, Value from Data", function() {
 });
 
 test("Key from Context, Value from Data", function() {
-  var template = CompilerContext.compile('{{test ~<a>}}', {data: true});
+  var template = CompilerContext.compile('{{test ~{a} }}', {data: true});
 
   var context = {
     "a": "realKey"
@@ -1796,7 +1796,7 @@ test("Key from Context, Value from Data", function() {
 });
 
 test("Key from Nested Context, Value from Data", function() {
-  var template = CompilerContext.compile('{{test ~<nested.a>}}', {data: true});
+  var template = CompilerContext.compile('{{test ~{nested.a} }}', {data: true});
 
   var context = {
     "nested": {
@@ -1819,7 +1819,7 @@ test("Key from Nested Context, Value from Data", function() {
 });
 
 test("Key from Data, Value from Nested Context", function() {
-  var template = CompilerContext.compile('{{test nested.<~a>}}', {data: true});
+  var template = CompilerContext.compile('{{test nested.{~a} }}', {data: true});
 
   var context = {
     "nested": {
@@ -1842,7 +1842,7 @@ test("Key from Data, Value from Nested Context", function() {
 });
 
 test("Key from Nested Data, Value from Nested Context", function() {
-  var template = CompilerContext.compile('{{test nested.<~nested.a>}}', {data: true});
+  var template = CompilerContext.compile('{{test nested.{~nested.a} }}', {data: true});
 
   var context = {
     "nested": {
@@ -1868,7 +1868,7 @@ test("Key from Nested Data, Value from Nested Context", function() {
 
 
 test("Key from Nested Context, Value from Context", function() {
-  var template = CompilerContext.compile('{{test <a.b>}}');
+  var template = CompilerContext.compile('{{test {a.b} }}');
 
   var context = {
     "a": {
@@ -1888,7 +1888,7 @@ test("Key from Nested Context, Value from Context", function() {
 });
 
 test("Key from Nested Context, Value from Nested Context", function() {
-  var template = CompilerContext.compile('{{test nested.<a.b>}}');
+  var template = CompilerContext.compile('{{test nested.{a.b} }}');
 
   var context = {
     "a": {
@@ -1910,7 +1910,7 @@ test("Key from Nested Context, Value from Nested Context", function() {
 });
 
 test("Key from Nested Data, Value from Context", function() {
-  var template = CompilerContext.compile('{{test <~a.b>}}', {data: true});
+  var template = CompilerContext.compile('{{test {~a.b} }}', {data: true});
 
   var context = {
     "realKey": "success"
@@ -1933,7 +1933,7 @@ test("Key from Nested Data, Value from Context", function() {
 });
 
 test("Key from Nested Data, Value from Data", function() {
-  var template = CompilerContext.compile('{{test ~<~a.b>}}', {data: true});
+  var template = CompilerContext.compile('{{test ~{~a.b} }}', {data: true});
 
   var context = {
 

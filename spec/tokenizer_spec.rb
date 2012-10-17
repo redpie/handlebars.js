@@ -274,4 +274,93 @@ describe "Tokenizer" do
   it "does not time out in a mustache when invalid ID characters are used" do
     Timeout.timeout(1) { tokenize("{{foo & }}").should match_tokens(%w(OPEN ID)) }
   end
+
+  describe "Redpie Tests" do
+    it "should parse indirect ID lookups which use {} as identifiers - {{ {bar} }}" do
+      result = tokenize("{{ {bar} }}")
+      result.should match_tokens(%w(OPEN ID CLOSE))
+      result[1].should be_token("ID", "{bar}")
+      result[2].should be_token("CLOSE", "}}")
+    end
+
+    it "should parse indirect ID lookups which use {} as identifiers - {{ ~{bar} }}" do
+      result = tokenize("{{ ~{bar} }}")
+      result.should match_tokens(%w(OPEN ID CLOSE))
+      result[1].should be_token("ID", "~{bar}")
+      result[2].should be_token("CLOSE", "}}")
+    end
+
+    it "should parse indirect ID lookups which use {} as identifiers - {{ foo.{bar} }}" do
+      result = tokenize("{{ foo.{bar} }}")
+      result.should match_tokens(%w(OPEN ID SEP ID CLOSE))
+      result[1].should be_token("ID", "foo")
+      result[3].should be_token("ID", "{bar}")
+      result[4].should be_token("CLOSE", "}}")
+    end
+
+    it "should parse indirect ID lookups which use {} as identifiers - {{ ~foo.{bar} }}" do
+      result = tokenize("{{ ~foo.{bar} }}")
+      result.should match_tokens(%w(OPEN ID SEP ID CLOSE))
+      result[1].should be_token("ID", "~foo")
+      result[3].should be_token("ID", "{bar}")
+      result[4].should be_token("CLOSE", "}}")
+    end
+
+    it "should parse indirect ID lookups which use {} as identifiers - {{ foo.{~bar} }}" do
+      result = tokenize("{{ foo.{~bar} }}")
+      result.should match_tokens(%w(OPEN ID SEP ID CLOSE))
+      result[1].should be_token("ID", "foo")
+      result[3].should be_token("ID", "{~bar}")
+      result[4].should be_token("CLOSE", "}}")
+    end
+
+    it "should parse indirect ID lookups which use {} as identifiers - {{ {foo.bar} }}" do
+      result = tokenize("{{ {foo.bar} }}")
+      result.should match_tokens(%w(OPEN ID SEP ID CLOSE))
+      result[1].should be_token("ID", "{foo")
+      result[3].should be_token("ID", "bar}")
+      result[4].should be_token("CLOSE", "}}")
+    end
+
+    it "should parse indirect ID lookups which use {} as identifiers - {{ ~{foo.bar} }}" do
+      result = tokenize("{{ ~{foo.bar} }}")
+      result.should match_tokens(%w(OPEN ID SEP ID CLOSE))
+      result[1].should be_token("ID", "~{foo")
+      result[3].should be_token("ID", "bar}")
+      result[4].should be_token("CLOSE", "}}")
+    end
+
+    it "should parse indirect ID lookups which use {} as identifiers - {{ ~{~foo.bar} }}" do
+      result = tokenize("{{ ~{~foo.bar} }}")
+      result.should match_tokens(%w(OPEN ID SEP ID CLOSE))
+      result[1].should be_token("ID", "~{~foo")
+      result[3].should be_token("ID", "bar}")
+      result[4].should be_token("CLOSE", "}}")
+    end
+
+    it "should parse indirect ID lookups which use {} as identifiers - {{ foo.{~bar}.baz }}" do
+      result = tokenize("{{ foo.{~bar}.baz }}")
+      result.should match_tokens(%w(OPEN ID SEP ID SEP ID CLOSE))
+      result[1].should be_token("ID", "foo")
+      result[3].should be_token("ID", "{~bar}")
+      result[5].should be_token("ID", "baz")
+      result[6].should be_token("CLOSE", "}}")
+    end
+
+    it "should parse indirect ID lookups which use {} as identifiers - {{ {~bar}.baz }}" do
+      result = tokenize("{{ {~bar}.baz }}")
+      result.should match_tokens(%w(OPEN ID SEP ID CLOSE))
+      result[1].should be_token("ID", "{~bar}")
+      result[3].should be_token("ID", "baz")
+      result[4].should be_token("CLOSE", "}}")
+    end
+
+    it "should parse indirect ID lookups which use {} as identifiers - {{ {foo}.{bar} }}" do
+      result = tokenize("{{ {foo}.{bar} }}")
+      result.should match_tokens(%w(OPEN ID SEP ID CLOSE))
+      result[1].should be_token("ID", "{foo}")
+      result[3].should be_token("ID", "{bar}")
+      result[4].should be_token("CLOSE", "}}")
+    end
+  end
 end
