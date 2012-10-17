@@ -1197,7 +1197,7 @@ test("Test Helper paramsData is passed", function() {
 
       equals(paramsData.length, 1, 'Correct number of objects in paramsData');
 
-      paramOne = paramsData[0];
+      var paramOne = paramsData[0];
 
       ok(paramOne.context !== undefined, 'paramsData[0].context is undefined');
       ok(paramOne.property !== undefined, 'paramsData[0].property is undefined');
@@ -1212,7 +1212,7 @@ test("Test Helper paramsData is passed", function() {
 
   var context = {
     'boolean': true
-  }
+  };
 
   var result = template(context, {helpers: helpers});
 
@@ -1226,7 +1226,7 @@ test("Test Helper paramsData is passed correctly with leading stringParam", func
     test: function(stringParam, nonStringParam, options, paramsData) {
       equals(paramsData.length, 2, 'Correct number of objects in paramsData');
 
-      paramTwo = paramsData[1];
+      var paramTwo = paramsData[1];
 
       ok(paramTwo.context !== undefined, 'paramsData[1].context is undefined');
       ok(paramTwo.property !== undefined, 'paramsData[1].property is undefined');
@@ -1241,7 +1241,7 @@ test("Test Helper paramsData is passed correctly with leading stringParam", func
 
   var context = {
     'boolean': true
-  }
+  };
 
   var result = template(context, {helpers: helpers});
 
@@ -1253,11 +1253,11 @@ test("Test Helper paramsData context is correct", function() {
 
   var context = {
     level1: {level2: {level3: {property: "value"}}}
-  }
+  };
 
   var helpers = {
     test: function(value, options, paramsData) {
-      paramOne = paramsData[0];
+      var paramOne = paramsData[0];
 
       equals(paramOne.context, Object(paramOne.context), 'Param context is not an object');
       equals(paramOne.context, context.level1.level2.level3, 'Param context has an invalid value');
@@ -1272,11 +1272,11 @@ test("Test Helper paramsData context is correct inside a with", function() {
 
   var context = {
     level1: {level2: {level3: {property: "value"}}}
-  }
+  };
 
   var helpers = {
     test: function(value, options, paramsData) {
-      paramOne = paramsData[0];
+      var paramOne = paramsData[0];
 
       equals(paramOne.context, Object(paramOne.context), 'Param context is not an object');
       equals(paramOne.context, context.level1.level2.level3, 'Param context has an invalid value');
@@ -1292,11 +1292,11 @@ test("Test Helper paramsData context is correct inside a relative with", functio
 
   var context = {
     level1: {level2: {level3: {}}, property: "value"}
-  }
+  };
 
   var helpers = {
     test: function(value, options, paramsData) {
-      paramOne = paramsData[0];
+      var paramOne = paramsData[0];
 
       equals(paramOne.context, Object(paramOne.context), 'Param context is not an object');
       equals(paramOne.context, context, 'Param context has an invalid value');
@@ -1312,7 +1312,7 @@ test("Test Helper paramsData property is correct", function() {
 
   var helpers = {
     test: function(value, options, paramsData) {
-      paramOne = paramsData[0];
+      var paramOne = paramsData[0];
 
       ok(paramOne.property !== undefined, 'paramsData[0].property is undefined');
       equals(paramOne.property, 'property', 'Incorrect property name');
@@ -1321,7 +1321,7 @@ test("Test Helper paramsData property is correct", function() {
 
   var context = {
     level1: {level2: {level3: {property: "value"}}}
-  }
+  };
 
   template(context, {helpers: helpers});
 });
@@ -1331,11 +1331,11 @@ test("Test Helper paramsData path is correct inside a with", function() {
 
   var context = {
     level1: {level2: {level3: {property: "value"}}}
-  }
+  };
 
   var helpers = {
     test: function(value, options, paramsData) {
-      paramOne = paramsData[0];
+      var paramOne = paramsData[0];
 
       ok(paramOne.property !== undefined, 'paramsData[0].property is undefined');
       equals(paramOne.property, 'property', 'Incorrect property name');
@@ -1352,11 +1352,11 @@ test("Test Helper paramsData path is correct inside a relative with", function()
 
   var context = {
     level1: {level2: {level3: {}}, property: "value"}
-  }
+  };
 
   var helpers = {
     test: function(value, options, paramsData) {
-      paramOne = paramsData[0];
+      var paramOne = paramsData[0];
 
       ok(paramOne.property !== undefined, 'paramsData[0].property is undefined');
       equals(paramOne.property, 'property', 'Incorrect property name');
@@ -1375,14 +1375,14 @@ test("Test Helper paramsData has isThis = true when 'this' is used as an ID", fu
 
       equals(paramsData.length, 1, 'Correct number of objects in paramsData');
 
-      paramOne = paramsData[0];
+      var paramOne = paramsData[0];
 
       ok(paramOne.isThis !== undefined, 'paramsData[0].isThis is undefined');
-      ok(paramOne.isThis == true, 'paramsData[0].isThis is not true');
+      ok(paramOne.isThis === true, 'paramsData[0].isThis is not true');
     }
   };
 
-  var context = {}
+  var context = {};
 
   var result = template(context, {helpers: helpers});
 });
@@ -1395,16 +1395,95 @@ test("Test Helper paramsData has isThis = false when 'this' is NOT used as an ID
 
       equals(paramsData.length, 1, 'Correct number of objects in paramsData');
 
-      paramOne = paramsData[0];
+      var paramOne = paramsData[0];
 
       ok(paramOne.isThis !== undefined, 'paramsData[0].isThis is undefined');
-      ok(paramOne.isThis == false, 'paramsData[0].isThis is not false');
+      ok(paramOne.isThis === false, 'paramsData[0].isThis is not false');
     }
   };
 
   var context = {
     'name': 'Kiall'
-  }
+  };
+
+  var result = template(context, {helpers: helpers});
+});
+
+test("Test Helper paramsData when used with an indirect ID lookup", function() {
+  var template = CompilerContext.compile('{{test {key} }}');
+
+  var helpers = {
+    test: function(value, options, paramsData) {
+
+      equals(paramsData.length, 1, 'Correct number of objects in paramsData');
+
+      var paramOne = paramsData[0];
+
+      ok(value == 'Kiall', 'value is incorrect');
+      ok(paramOne.property == 'name', 'paramsData[0].property is incorrect ' + paramOne.property);
+      ok(paramOne.context == context, 'paramsData[0].context is incorrect');
+    }
+  };
+
+  var context = {
+    'key': 'name',
+    'name': 'Kiall',
+  };
+
+  var result = template(context, {helpers: helpers});
+});
+
+
+test("Test Helper paramsData when used with an indirect path ID lookup", function() {
+  var template = CompilerContext.compile('{{test {nested.key} }}');
+
+  var context = {
+    'nested': {
+      'key': 'name'
+    },
+    'name': 'Kiall',
+  };
+
+  var helpers = {
+    test: function(value, options, paramsData) {
+
+      equals(paramsData.length, 1, 'Correct number of objects in paramsData');
+
+      var paramOne = paramsData[0];
+
+      ok(value == 'Kiall', 'value is incorrect');
+      ok(paramOne.property == 'name', 'paramsData[0].property is incorrect');
+      ok(paramOne.context == context, 'paramsData[0].context is incorrect');
+    }
+  };
+
+  var result = template(context, {helpers: helpers});
+});
+
+test("Test Helper paramsData when used with an indirect ID path lookup", function() {
+  var template = CompilerContext.compile('{{test otherNested.{nested.key} }}');
+
+  var context = {
+    'nested': {
+      'key': 'name'
+    },
+    'otherNested':{
+      'name': 'Kiall'
+    }
+  };
+
+  var helpers = {
+    test: function(value, options, paramsData) {
+
+      equals(paramsData.length, 1, 'Correct number of objects in paramsData');
+
+      var paramOne = paramsData[0];
+
+      ok(value == 'Kiall', 'value is incorrect');
+      ok(paramOne.property == 'name', 'paramsData[0].property is incorrect');
+      ok(paramOne.context == context.otherNested, 'paramsData[0].context is incorrect');
+    }
+  };
 
   var result = template(context, {helpers: helpers});
 });
@@ -1429,7 +1508,7 @@ test("Test nameLookup will use a propery over a get() method if present", functi
         }
       }
     }
-  }
+  };
 
   var helpers = {
     test: function(value, options, paramsData) {
@@ -1452,7 +1531,7 @@ test("Test nameLookup will handle arrays correcting using the at() method", func
         'invalidThree',
       ]
     }
-  }
+  };
 
   var helpers = {
     test: function(value, options, paramsData) {
@@ -1468,7 +1547,7 @@ test("Test nameLookup will handle arrays correcting using the at() method", func
 test("Test nameLookup handle the string 'undefined' correctly", function() {
   var template = CompilerContext.compile('{{test undefined}}');
 
-  var context = {}
+  var context = {};
 
   var helpers = {
     test: function(value, options, paramsData) {
@@ -1484,11 +1563,11 @@ test("Test nameLookup data rather than context if ID starts with a ~", function(
 
   var context = {
     property: 'invalid'
-  }
+  };
 
   var dataContext = {
     property: 'valid'
-  }
+  };
 
   var helpers = {
     test: function(value, options, paramsData) {
@@ -1507,13 +1586,13 @@ test("Test nameLookup data rather than context if ID starts with a ~ nested", fu
 
   var context = {
     property: 'invalid'
-  }
+  };
 
   var dataContext = {
     nested: {
       property: 'valid'
     }
-  }
+  };
 
   var helpers = {
     test: function(value, options, paramsData) {
@@ -1532,7 +1611,7 @@ test("Test nameLookup data rather than context if ID starts with a ~ nested with
 
   var context = {
     property: 'invalid'
-  }
+  };
 
   var dataContext = {
     nested: {
@@ -1543,7 +1622,7 @@ test("Test nameLookup data rather than context if ID starts with a ~ nested with
         'invalidThree',
       ]
     }
-  }
+  };
 
   var helpers = {
     test: function(value, options, paramsData) {
@@ -1569,7 +1648,7 @@ test("Test depth0 and view data is passed through on function calls", function()
        equals(depth0.contextMarker, 'yes', 'invalid value for depth0');
        equals(data.dataContextMarker, 'yes', 'invalid value for data');
     }
-  }
+  };
 
   var dataContext = {
     dataContextMarker: 'yes'
@@ -1599,7 +1678,7 @@ test("Test depth0 and view data is passed through on function calls inside an ea
       contextMarker: 2,
       myFunction: myFunction
     }]
-  }
+  };
 
   var dataContext = {
     dataContextMarker: 'yes'
@@ -1628,7 +1707,7 @@ test("Test depth0 and view data is passed through on relative (parent) function 
     },{
       contextMarker: 2
     }]
-  }
+  };
 
   var dataContext = {
     dataContextMarker: 'yes'
