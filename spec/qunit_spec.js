@@ -2034,3 +2034,117 @@ test("Key from Nested Data, Value from Data", function() {
 
   template(context, {helpers: helpers, data: dataContext});
 });
+
+test("Key from Context, Value from Context - Additional level after ID lookup", function() {
+  var template = CompilerContext.compile('{{test {a}.b }}');
+
+  var context = {
+    "realKey": {
+      "b": "success"
+    },
+    "a": "realKey"
+  };
+
+  var helpers = {
+    test: function(value, options, paramsData) {
+      // throw new Error(JSON.stringify(paramsData));
+      equals(value, 'success', 'Indirect ID lookup failed');
+    },
+  };
+
+  template(context, {helpers: helpers});
+});
+
+test("Key from Context, Value from Context - Two additional levels after ID lookup", function() {
+  var template = CompilerContext.compile('{{test {a}.b.c }}');
+
+  var context = {
+    "realKey": {
+      "b": {
+        "c": "success"
+      }
+    },
+    "a": "realKey"
+  };
+
+  var helpers = {
+    test: function(value, options, paramsData) {
+      // throw new Error(JSON.stringify(paramsData));
+      equals(value, 'success', 'Indirect ID lookup failed');
+    },
+  };
+
+  template(context, {helpers: helpers});
+});
+
+test("Key from Context, Value from Context - Leading level, Additional level after ID lookup", function() {
+  var template = CompilerContext.compile('{{test a.{b}.c }}');
+
+  var context = {
+    "a": {
+      "realKey": {
+        "c": "success"
+      }
+    },
+    "b": "realKey"
+  };
+
+  var helpers = {
+    test: function(value, options, paramsData) {
+      // throw new Error(JSON.stringify(paramsData));
+      equals(value, 'success', 'Indirect ID lookup failed');
+    },
+  };
+
+  template(context, {helpers: helpers});
+});
+
+test("Key from Context, Value from Context - Leading level, Two additional levels after ID lookup", function() {
+  var template = CompilerContext.compile('{{test a.{b}.c.d }}');
+
+  var context = {
+    "a": {
+      "realKey": {
+        "c": {
+          "d": "success"
+        }
+      }
+    },
+    "b": "realKey"
+  };
+
+  var helpers = {
+    test: function(value, options, paramsData) {
+      // throw new Error(JSON.stringify(paramsData));
+      equals(value, 'success', 'Indirect ID lookup failed');
+    },
+  };
+
+  template(context, {helpers: helpers});
+});
+
+test("Key from Context, Value from Context - Leading level, Three additional levels after ID lookup", function() {
+  var template = CompilerContext.compile('{{test a.{b}.c.d.e }}');
+
+  var context = {
+    "a": {
+      "realKey": {
+        "c": {
+          "d": {
+            "e": "success"
+          }
+        }
+      }
+    },
+    "b": "realKey"
+  };
+
+  var helpers = {
+    test: function(value, options, paramsData) {
+      // throw new Error(JSON.stringify(paramsData));
+      equals(value, 'success', 'Indirect ID lookup failed');
+    },
+  };
+
+  template(context, {helpers: helpers});
+});
