@@ -33,7 +33,13 @@ Handlebars.registerHelper('helperMissing', function(helper, context) {
 function shouldCompileTo(string, hashOrArray, expected, message) {
   shouldCompileToWithPartials(string, hashOrArray, false, expected, message);
 }
+
 function shouldCompileToWithPartials(string, hashOrArray, partials, expected, message) {
+  var result = compileWithPartials(string, hashOrArray, partials);
+  equal(result, expected, "'" + expected + "' should === '" + result + "': " + message);
+}
+
+function compileWithPartials(string, hashOrArray, partials) {
   var template = CompilerContext[partials ? 'compileWithPartial' : 'compile'](string), ary;
   if(Object.prototype.toString.call(hashOrArray) === "[object Array]") {
     var helpers = hashOrArray[1];
@@ -51,8 +57,7 @@ function shouldCompileToWithPartials(string, hashOrArray, partials, expected, me
     ary = [hashOrArray];
   }
 
-  var result = template.apply(this, ary);
-  equal(result, expected, "'" + expected + "' should === '" + result + "': " + message);
+  return template.apply(this, ary);
 }
 
 function shouldThrow(fn, exception, message) {
@@ -123,6 +128,8 @@ test("escaping expressions", function() {
  shouldCompileTo("{{awesome}}", {awesome: "&\"'`\\<>"}, '&amp;&quot;&#x27;&#x60;\\&lt;&gt;',
         "by default expressions should be escaped");
 
+ shouldCompileTo("{{awesome}}", {awesome: "Escaped, <b> looks like: &lt;b&gt;"}, 'Escaped, &lt;b&gt; looks like: &amp;lt;b&amp;gt;',
+        "escaping should properly handle amperstands");
 });
 
 test("functions returning safestrings shouldn't be escaped", function() {
@@ -134,6 +141,8 @@ test("functions returning safestrings shouldn't be escaped", function() {
 test("functions", function() {
   shouldCompileTo("{{awesome}}", {awesome: function() { return "Awesome"; }}, "Awesome",
                   "functions are called and render their output");
+  shouldCompileTo("{{awesome}}", {awesome: function() { return this.more; }, more:  "More awesome"}, "More awesome",
+                  "functions are bound to the context");
 });
 
 test("paths with hyphens", function() {
@@ -234,6 +243,16 @@ test("array", function() {
   shouldCompileTo(string, {goodbyes: [], world: "world"}, "cruel world!",
                   "Arrays ignore the contents when empty");
 
+});
+
+test("array with @index", function() {
+  var string = "{{#goodbyes}}{{@index}}. {{text}}! {{/goodbyes}}cruel {{world}}!";
+  var hash   = {goodbyes: [{text: "goodbye"}, {text: "Goodbye"}, {text: "GOODBYE"}], world: "world"};
+
+  var template = CompilerContext.compile(string);
+  var result = template(hash);
+
+  equal(result, "0. goodbye! 1. Goodbye! 2. GOODBYE! cruel world!", "The @index variable is used");
 });
 
 test("empty block", function() {
@@ -604,6 +623,11 @@ test("Invert blocks work in knownHelpers only mode", function() {
   var result = template({foo: false});
   equal(result, "bar", "'bar' should === '" + result);
 });
+test("Functions are bound to the context in knownHelpers only mode", function() {
+  var template = CompilerContext.compile("{{foo}}", {knownHelpersOnly: true});
+  var result = template({foo: function() { return this.bar; }, bar: 'bar'});
+  equal(result, "bar", "'bar' should === '" + result);
+});
 
 suite("blockHelperMissing");
 
@@ -611,6 +635,11 @@ test("lambdas are resolved by blockHelperMissing, not handlebars proper", functi
   var string = "{{#truthy}}yep{{/truthy}}";
   var data = { truthy: function() { return true; } };
   shouldCompileTo(string, data, "yep");
+});
+test("lambdas resolved by blockHelperMissing are bound to the context", function() {
+  var string = "{{#truthy}}yep{{/truthy}}";
+  var boundData = { truthy: function() { return this.truthiness(); }, truthiness: function() { return false; } };
+  shouldCompileTo(string, boundData, "");
 });
 
 var teardown;
@@ -659,6 +688,22 @@ test("each", function() {
                   "each with array argument iterates over the contents when not empty");
   shouldCompileTo(string, {goodbyes: [], world: "world"}, "cruel world!",
                   "each with array argument ignores the contents when empty");
+});
+
+test("each with an object and @key", function() {
+  var string   = "{{#each goodbyes}}{{@key}}. {{text}}! {{/each}}cruel {{world}}!";
+  var hash     = {goodbyes: {"<b>#1</b>": {text: "goodbye"}, 2: {text: "GOODBYE"}}, world: "world"};
+
+  // Object property iteration order is undefined according to ECMA spec,
+  // so we need to check both possible orders
+  // @see http://stackoverflow.com/questions/280713/elements-order-in-a-for-in-loop
+  var actual = compileWithPartials(string, hash);
+  var expected1 = "&lt;b&gt;#1&lt;/b&gt;. goodbye! 2. GOODBYE! cruel world!";
+  var expected2 = "2. GOODBYE! &lt;b&gt;#1&lt;/b&gt;. goodbye! cruel world!";
+
+  ok(actual === expected1 || actual === expected2, "each with object argument iterates over the contents when not empty");
+  shouldCompileTo(string, {goodbyes: [], world: "world"}, "cruel world!",
+                  "each with object argument ignores the contents when empty");
 });
 
 test("each with @index", function() {
