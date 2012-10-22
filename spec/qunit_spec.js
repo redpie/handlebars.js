@@ -2141,7 +2141,6 @@ test("Key from Context, Value from Context - Leading level, Three additional lev
 
   var helpers = {
     test: function(value, options, paramsData) {
-      // throw new Error(JSON.stringify(paramsData));
       equals(value, 'success', 'Indirect ID lookup failed');
     },
   };
